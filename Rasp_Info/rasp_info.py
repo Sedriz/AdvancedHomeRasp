@@ -33,7 +33,7 @@ while True:
     cpu = CPUTemperature()
     temperature = cpu.temperature
 
-    statvfs = os.statvfs('/home/')
+    statvfs = os.statvfs('/')
 
     if temperature != None and statvfs != None:
 
