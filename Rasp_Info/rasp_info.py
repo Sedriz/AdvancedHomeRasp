@@ -5,6 +5,7 @@ from datetime import datetime
 from gpiozero import CPUTemperature
 import json
 import os
+import psutil
 
 
 def on_connect(client, userdata, flags, rc):
@@ -44,6 +45,10 @@ while True:
                 "size": statvfs.f_frsize * statvfs.f_blocks, # Size of filesystem in bytes
                 "actual_free": statvfs.f_frsize * statvfs.f_bfree, # Actual number of free bytes
                 "can_used_space": statvfs.f_frsize * statvfs.f_bavail # Number of free bytes that ordinary users are allowed to use (excl. reserved space)
+            },
+            "performance": {
+                "cpu": psutil.cpu_percent(4),
+                "ram": psutil.virtual_memory()[2],
             }
         }
 
