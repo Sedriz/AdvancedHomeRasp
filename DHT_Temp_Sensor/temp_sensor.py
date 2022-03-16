@@ -34,7 +34,6 @@ while True:
     humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, args.pin)
 
     if humidity is not None and temperature is not None:
-        value = "{2} - T={0:0.1f} H={1:0.1f}".format(temperature, humidity, datetime.now())
         value = '{ "timestamp": ' + datetime.now() + ', "temperature": ' + temperature + ', "humidity": ' + humidity + ' }'
 
         print("Publishing message to topic", args.topic)
