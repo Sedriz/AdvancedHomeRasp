@@ -3,6 +3,7 @@ import argparse
 import Adafruit_DHT
 import time
 from datetime import datetime
+import json
 
 
 def on_connect(client, userdata, flags, rc):
@@ -34,11 +35,17 @@ while True:
     humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, args.pin)
 
     if humidity is not None and temperature is not None:
-        value = '{ "timestamp": ' + datetime.now().strftime('%m/%d/%Y') + ', "temperature": ' + str(temperature) + ', "humidity": ' + str(humidity) + ' }'
+        value = {
+            "timestamp": datetime.now().strftime('%m/%d/%Y'),
+            "temperature": temperature,
+            "humidity": humidity
+        }
+
+        jsonValue = json.dumps(value)
 
         print("Publishing message to topic", args.topic)
 
-        client.publish(args.topic, value)
+        client.publish(args.topic, jsonValue)
     else:
         print("Failed to retrieve data from humidity sensor")
 
