@@ -3,6 +3,7 @@ import argparse
 import time
 from datetime import datetime
 from gpiozero import CPUTemperature
+import json
 
 
 def on_connect(client, userdata, flags, rc):
@@ -32,11 +33,16 @@ while True:
     temperature = cpu.temperature
 
     if temperature is not None:
-        value = '{ "timestamp": ' + datetime.now() + ', "temperature": ' + temperature + ' }'
+        value = {
+            "timestamp": datetime.now().strftime('%m/%d/%Y'),
+            "temperature": temperature
+        }
+
+        jsonValue = json.dumps(value)
 
         print("Publishing message to topic", args.topic)
 
-        client.publish(args.topic, value)
+        client.publish(args.topic, jsonValue)
     else:
         print("Failed to retrieve data from humidity sensor")
 
