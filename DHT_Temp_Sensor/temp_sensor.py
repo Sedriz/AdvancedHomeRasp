@@ -9,7 +9,7 @@ import paho.mqtt.client as mqtt
 
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
+    logging.info("Connected with result code " + str(rc))
 
 
 # Process arguments
@@ -30,6 +30,8 @@ USERNAME = config.get(configuration_name, 'username')
 PASSWORD = config.get(configuration_name, 'password')
 IP = config.get(configuration_name, 'ip')
 PORT = config.get(configuration_name, 'port')
+
+logging.info("Setup done!")
 
 try:
     DHT_SENSOR = Adafruit_DHT.AM2302
@@ -55,7 +57,8 @@ try:
 
         topic = "device/" + args.id + "/command"
 
-        logging.info("Publishing message to topic: " + topic)
+        logging.info("Publishing to topic: " + topic)
+        logging.info("Publishing message: " + jsonValue)
 
         client.publish(topic, jsonValue)
     else:

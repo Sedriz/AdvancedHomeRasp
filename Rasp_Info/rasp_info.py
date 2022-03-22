@@ -11,7 +11,7 @@ from gpiozero import CPUTemperature
 
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
+    logging.info("Connected with result code " + str(rc))
 
 # Process arguments
 parser = argparse.ArgumentParser()
@@ -41,6 +41,8 @@ try:
 
     client.loop_start()  # start the loop
 
+    logging.info("Setup done!")
+
     cpu = CPUTemperature()
     temperature = cpu.temperature
 
@@ -66,10 +68,12 @@ try:
 
         topic = "device/" + args.id + "/command"
 
-        logging.info("Publishing message to topic: " + topic)
+        logging.info("Publishing to topic: " + topic)
+        logging.info("Publishing message: " + jsonValue)
 
         client.publish(topic, jsonValue)
     else:
         logging.error("Failed to retrieve data from humidity sensor!")
 except:
     logging.error("Error while publishing data to mqtt!")
+    
