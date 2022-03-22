@@ -30,7 +30,7 @@ configuration_name = 'mqtt-config'
 USERNAME = config.get(configuration_name, 'username')
 PASSWORD = config.get(configuration_name, 'password')
 IP = config.get(configuration_name, 'ip')
-PORT = config.get(configuration_name, 'port')
+PORT = config.getint(configuration_name, 'port')
 
 try:
     client = mqtt.Client()
@@ -76,4 +76,3 @@ try:
         logging.error("Failed to retrieve data from humidity sensor!")
 except:
     logging.error("Error while publishing data to mqtt!")
-    
