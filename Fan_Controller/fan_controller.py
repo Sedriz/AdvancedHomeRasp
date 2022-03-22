@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
-import os
 import time
+
 from gpiozero import CPUTemperature
 from gpiozero import OutputDevice
+
 
 def main():
     fan = OutputDevice(18)
