@@ -50,7 +50,7 @@ try:
     if temperature is not None and statvfs is not None:
 
         value = {
-            "timestamp": datetime.now().strftime('%m-%d-%YT%H:%M:%S+%X'),
+            "timestamp": datetime.now().strftime('%m-%d-%YT%H:%M:%S'),
             "temperature": temperature,
             "disc": {
                 "size": statvfs.f_frsize * statvfs.f_blocks, # Size of filesystem in bytes

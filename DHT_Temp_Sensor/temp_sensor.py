@@ -48,7 +48,7 @@ try:
 
     if humidity is not None and temperature is not None:
         value = {
-            "timestamp": datetime.now().strftime('%m-%d-%YT%H:%M:%S+%X'),
+            "timestamp": datetime.now().strftime('%m-%d-%YT%H:%M:%S'),
             "temperature": temperature,
             "humidity": humidity
         }
