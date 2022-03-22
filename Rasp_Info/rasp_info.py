@@ -17,7 +17,6 @@ def on_connect(client, userdata, flags, rc):
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', action='store', dest='config', help='The location of the config')
 parser.add_argument('-id', '--deviceid', action='store', dest='id', help='The id of the device')
-parser.add_argument('-n', '--pin', type=int, action='store', default=4, dest='pin', help='The sensor pin')
 args = parser.parse_args()
 
 logging.basicConfig(filename="rasp_info.log")
