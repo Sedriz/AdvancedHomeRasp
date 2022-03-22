@@ -1,42 +1,52 @@
-import paho.mqtt.client as mqtt
 import argparse
-import time
-from datetime import datetime
-from gpiozero import CPUTemperature
 import json
+import logging
 import os
+import configparser
+from datetime import datetime
+
+import paho.mqtt.client as mqtt
 import psutil
+from gpiozero import CPUTemperature
 
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
 
-
 # Process arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-u', '--username', action='store', dest='username', help='The mqtt username.')
-parser.add_argument('-P', '--password', action='store', dest='password', help='The mqtt password.')
-parser.add_argument('-t', '--topic', action='store', dest='topic', help='The mqtt topic to publish to.')
-parser.add_argument('-i', '--ip', action='store', dest='ip', default='127.0.0.1', help='The mqtt Server ip')
-parser.add_argument('-p', '--port', type=int, action='store', dest='port', default=1883, help='The mqtt Server port')
-parser.add_argument('-s', '--seconds', type=float, action='store', dest='seconds', help='The interval to publish')
+parser.add_argument('-c', '--config', action='store', dest='config', help='The location of the config')
+parser.add_argument('-id', '--deviceid', action='store', dest='id', help='The id of the device')
+parser.add_argument('-n', '--pin', type=int, action='store', default=4, dest='pin', help='The sensor pin')
 args = parser.parse_args()
 
-client = mqtt.Client()
-client.on_connect = on_connect
+logging.basicConfig(filename="rasp_info.log")
 
-client.username_pw_set(username=args.username, password=args.password)
-client.connect(args.ip, args.port, 60)
+config = configparser.ConfigParser()
+config.read(args.config)
 
-client.loop_start()  # start the loop
+configuration_name = 'mqtt-config'
 
-while True:
+USERNAME = config.get(configuration_name, 'username')
+PASSWORD = config.get(configuration_name, 'password')
+IP = config.get(configuration_name, 'ip')
+PORT = config.get(configuration_name, 'port')
+
+try:
+    client = mqtt.Client()
+    client.on_connect = on_connect
+
+    client.username_pw_set(username=USERNAME, password=PASSWORD)
+    client.connect(IP, PORT, 60)
+
+    client.loop_start()  # start the loop
+
     cpu = CPUTemperature()
     temperature = cpu.temperature
 
     statvfs = os.statvfs('/')
 
-    if temperature != None and statvfs != None:
+    if temperature is not None and statvfs is not None:
 
         value = {
             "timestamp": datetime.now().strftime('%m/%d/%Y'),
@@ -54,10 +64,12 @@ while True:
 
         jsonValue = json.dumps(value)
 
-        print("Publishing message to topic", args.topic)
+        topic = "device/" + args.id + "/command"
 
-        client.publish(args.topic, jsonValue)
+        logging.info("Publishing message to topic: " + topic)
+
+        client.publish(topic, jsonValue)
     else:
-        print("Failed to retrieve data from humidity sensor")
-
-    time.sleep(args.seconds)  # wait
+        logging.error("Failed to retrieve data from humidity sensor!")
+except:
+    logging.error("Error while publishing data to mqtt!")
