@@ -1,10 +1,11 @@
-import paho.mqtt.client as mqtt
 import argparse
-import Adafruit_DHT
-import time
-from datetime import datetime
-import json
 import configparser
+import json
+from datetime import datetime
+import logging
+
+import Adafruit_DHT
+import paho.mqtt.client as mqtt
 
 
 def on_connect(client, userdata, flags, rc):
@@ -18,6 +19,8 @@ parser.add_argument('-id', '--deviceid', action='store', dest='id', help='The id
 parser.add_argument('-n', '--pin', type=int, action='store', default=4, dest='pin', help='The sensor pin')
 args = parser.parse_args()
 
+logging.basicConfig(filename="temp_sensor.log")
+
 config = configparser.ConfigParser()
 config.read(args.config)
 
@@ -28,17 +31,17 @@ PASSWORD = config.get(configuration_name, 'password')
 IP = config.get(configuration_name, 'ip')
 PORT = config.get(configuration_name, 'port')
 
-DHT_SENSOR = Adafruit_DHT.AM2302
+try:
+    DHT_SENSOR = Adafruit_DHT.AM2302
 
-client = mqtt.Client()
-client.on_connect = on_connect
+    client = mqtt.Client()
+    client.on_connect = on_connect
 
-client.username_pw_set(username=USERNAME, password=PASSWORD)
-client.connect(IP, PORT, 60)
+    client.username_pw_set(username=USERNAME, password=PASSWORD)
+    client.connect(IP, PORT, 60)
 
-client.loop_start()  # start the loop
+    client.loop_start()  # start the loop
 
-while True:
     humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, args.pin)
 
     if humidity is not None and temperature is not None:
@@ -52,10 +55,11 @@ while True:
 
         topic = "device/" + args.id + "/command"
 
-        print("Publishing message to topic", topic)
+        logging.info("Publishing message to topic: " + topic)
 
         client.publish(topic, jsonValue)
     else:
-        print("Failed to retrieve data from humidity sensor")
+        logging.error("Failed to retrieve data from humidity sensor!")
 
-    time.sleep(args.seconds)  # wait
+except:
+    logging.error("Error while publishing data to mqtt!")
