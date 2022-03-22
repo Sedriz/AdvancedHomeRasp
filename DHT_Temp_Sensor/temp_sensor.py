@@ -4,6 +4,7 @@ import Adafruit_DHT
 import time
 from datetime import datetime
 import json
+import configparser
 
 
 def on_connect(client, userdata, flags, rc):
@@ -12,22 +13,28 @@ def on_connect(client, userdata, flags, rc):
 
 # Process arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-u', '--username', action='store', dest='username', help='The mqtt username.')
-parser.add_argument('-P', '--password', action='store', dest='password', help='The mqtt password.')
-parser.add_argument('-t', '--topic', action='store', dest='topic', help='The mqtt topic to publish to.')
-parser.add_argument('-i', '--ip', action='store', dest='ip', default='127.0.0.1', help='The mqtt Server ip')
-parser.add_argument('-p', '--port', type=int, action='store', dest='port', default=1883, help='The mqtt Server port')
-parser.add_argument('-s', '--seconds', type=float, action='store', dest='seconds', help='The interval to publish')
+parser.add_argument('-c', '--config', action='store', dest='config', help='The location of the config')
+parser.add_argument('-id', '--deviceid', action='store', dest='id', help='The id of the device')
 parser.add_argument('-n', '--pin', type=int, action='store', default=4, dest='pin', help='The sensor pin')
 args = parser.parse_args()
+
+config = configparser.ConfigParser()
+config.read(args.config)
+
+configuration_name = 'mqtt-config'
+
+USERNAME = config.get(configuration_name, 'username')
+PASSWORD = config.get(configuration_name, 'password')
+IP = config.get(configuration_name, 'ip')
+PORT = config.get(configuration_name, 'port')
 
 DHT_SENSOR = Adafruit_DHT.AM2302
 
 client = mqtt.Client()
 client.on_connect = on_connect
 
-client.username_pw_set(username=args.username, password=args.password)
-client.connect(args.ip, args.port, 60)
+client.username_pw_set(username=USERNAME, password=PASSWORD)
+client.connect(IP, PORT, 60)
 
 client.loop_start()  # start the loop
 
@@ -43,9 +50,11 @@ while True:
 
         jsonValue = json.dumps(value)
 
-        print("Publishing message to topic", args.topic)
+        topic = "device/" + args.id + "/command"
 
-        client.publish(args.topic, jsonValue)
+        print("Publishing message to topic", topic)
+
+        client.publish(topic, jsonValue)
     else:
         print("Failed to retrieve data from humidity sensor")
 
