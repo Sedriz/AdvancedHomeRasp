@@ -2,6 +2,7 @@ import json
 
 
 class State:
+    timestamp = ''
     mode = ''
     speed = 100
     brightness = 80

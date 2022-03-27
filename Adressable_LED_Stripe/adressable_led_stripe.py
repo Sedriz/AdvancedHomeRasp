@@ -12,17 +12,17 @@ from mode_enum import ModeEnum
 
 
 if __name__ == "__main__":
-    def connect_mqtt(mqtt_config, mqtt_configuration_name) -> mqtt:
+    def connect_mqtt(config, cfg_name) -> mqtt:
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
                 print("Connected to MQTT Broker!")
             else:
                 print("Failed to connect, return code %d\n", rc)
 
-        username = mqtt_config.get(mqtt_configuration_name, 'username')
-        password = mqtt_config.get(mqtt_configuration_name, 'password')
-        ip = mqtt_config.get(mqtt_configuration_name, 'ip')
-        port = mqtt_config.getint(mqtt_configuration_name, 'port')
+        username = config.get(cfg_name, 'username')
+        password = config.get(cfg_name, 'password')
+        ip = config.get(cfg_name, 'ip')
+        port = config.getint(cfg_name, 'port')
         client_id = f'python-mqtt-{random.randint(0, 100)}'
 
         client = mqtt.Client(client_id)
@@ -36,16 +36,23 @@ if __name__ == "__main__":
         def on_message(client, userdata, msg):
             global state
             message = msg.payload.decode()
-            print(f"Received `{message}` from `{msg.topic}` topic")
-            state = deserialize_json(message)
+            topic = msg.topic
+
+            print(f"Received `{message}` from `{topic}` topic")
+
+            if topic == LED_TOPIC:
+                state = deserialize_json(message)
+            elif topic == REQUEST_TOPIC:
+                print('Sending state')
+                publish(client, state)
 
         client.subscribe(LED_TOPIC)
         client.subscribe(REQUEST_TOPIC)
         client.on_message = on_message
 
 
-    def publish(client: mqtt, state: State):
-        value = serialize_json(state)
+    def publish(client: mqtt, state_param: State):
+        value = serialize_json(state_param)
 
         logging.info("Publishing to topic: " + PUBLISH_TOPIC)
         logging.info("Publishing message: " + value)
@@ -53,14 +60,14 @@ if __name__ == "__main__":
         client.publish(PUBLISH_TOPIC, value)
 
 
-    def setup_led_stripe(led_config, led_configuration_name):
-        count = led_config.getint(led_configuration_name, 'led_count')
-        pin = led_config.getint(led_configuration_name, 'led_pin')
-        freq_hz = led_config.getint(led_configuration_name, 'led_freq_hz')
-        dma = led_config.getint(led_configuration_name, 'led_dma')
-        invert = led_config.getboolean(led_configuration_name, 'led_invert')
-        brightness = led_config.getint(led_configuration_name, 'led_brightness')
-        channel = led_config.getint(led_configuration_name, 'led_channel')
+    def setup_led_stripe(config, cfg_name):
+        count = config.getint(cfg_name, 'led_count')
+        pin = config.getint(cfg_name, 'led_pin')
+        freq_hz = config.getint(cfg_name, 'led_freq_hz')
+        dma = config.getint(cfg_name, 'led_dma')
+        invert = config.getboolean(cfg_name, 'led_invert')
+        brightness = config.getint(cfg_name, 'led_brightness')
+        channel = config.getint(cfg_name, 'led_channel')
 
         # Create NeoPixel object with appropriate configuration.
         strip = Adafruit_NeoPixel(count, pin, freq_hz, dma, invert, brightness, channel)
@@ -89,31 +96,6 @@ if __name__ == "__main__":
         return parser.parse_args()
 
 
-    def setup(args):
-        print("Setting up!")
-
-        logging.basicConfig(filename="rasp_info.log")
-
-        # MQTT config file
-        mqtt_config = configparser.ConfigParser()
-        mqtt_config.read(args.mqtt_config)
-        mqtt_configuration_name = 'mqtt-config'
-
-        # Addressable LED Stripe config file
-        led_config = configparser.ConfigParser()
-        led_config.read(args.led_config)
-        led_configuration_name = 'led-stripe-config'
-
-        # Setup mqtt
-        client = connect_mqtt(mqtt_config, mqtt_configuration_name)
-        subscribe(client)
-        client.loop_start()
-
-        setup_led_stripe(led_config, led_configuration_name)
-
-        print("Setup done!")
-
-
     def execute_mode():
         print("executing")
 
@@ -134,7 +116,28 @@ if __name__ == "__main__":
     REQUEST_TOPIC = f'device/{args.id}/request'
     PUBLISH_TOPIC = f'main/{args.id}/1'
 
-    setup(args)
+    print("Setting up!")
+
+    logging.basicConfig(filename="addressable_led_stripe.log")
+
+    # MQTT config file
+    mqtt_config = configparser.ConfigParser()
+    mqtt_config.read(args.mqtt_config)
+    mqtt_configuration_name = 'mqtt-config'
+
+    # Addressable LED Stripe config file
+    led_config = configparser.ConfigParser()
+    led_config.read(args.led_config)
+    led_configuration_name = 'led-stripe-config'
+
+    # Setup mqtt
+    mqtt_client = connect_mqtt(mqtt_config, mqtt_configuration_name)
+    subscribe(mqtt_client)
+    mqtt_client.loop_start()
+
+    setup_led_stripe(led_config, led_configuration_name)
+
+    print("Setup done!")
 
     while True:
         try:
