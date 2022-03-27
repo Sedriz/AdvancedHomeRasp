@@ -8,10 +8,11 @@ from datetime import datetime
 import paho.mqtt.client as mqtt
 from rpi_ws281x import *
 from state import State
+from mode_enum import ModeEnum
 
 
 if __name__ == "__main__":
-    def connect_mqtt() -> mqtt:
+    def connect_mqtt(mqtt_config, mqtt_configuration_name) -> mqtt:
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
                 print("Connected to MQTT Broker!")
@@ -33,9 +34,13 @@ if __name__ == "__main__":
 
     def subscribe(client: mqtt):
         def on_message(client, userdata, msg):
-            print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+            global state
+            message = msg.payload.decode()
+            print(f"Received `{message}` from `{msg.topic}` topic")
+            state = deserialize_json(message)
 
         client.subscribe(LED_TOPIC)
+        client.subscribe(REQUEST_TOPIC)
         client.on_message = on_message
 
 
@@ -48,7 +53,7 @@ if __name__ == "__main__":
         client.publish(PUBLISH_TOPIC, value)
 
 
-    def setup_led_stripe():
+    def setup_led_stripe(led_config, led_configuration_name):
         count = led_config.getint(led_configuration_name, 'led_count')
         pin = led_config.getint(led_configuration_name, 'led_pin')
         freq_hz = led_config.getint(led_configuration_name, 'led_freq_hz')
@@ -63,14 +68,48 @@ if __name__ == "__main__":
         strip.begin()
 
 
-    def setup():
+    def get_args():
+        # Process arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-mc',
+                            '--mqttconfig',
+                            action='store',
+                            dest='mqtt_config',
+                            help='The location of the mqtt config')
+        parser.add_argument('-lc',
+                            '--ledconfig',
+                            action='store',
+                            dest='led_config',
+                            help='The location of the addressable led config')
+        parser.add_argument('-id',
+                            '--deviceid',
+                            action='store',
+                            dest='id',
+                            help='The id of the device')
+        return parser.parse_args()
+
+
+    def setup(args):
         print("Setting up!")
+
+        logging.basicConfig(filename="rasp_info.log")
+
+        # MQTT config file
+        mqtt_config = configparser.ConfigParser()
+        mqtt_config.read(args.mqtt_config)
+        mqtt_configuration_name = 'mqtt-config'
+
+        # Addressable LED Stripe config file
+        led_config = configparser.ConfigParser()
+        led_config.read(args.led_config)
+        led_configuration_name = 'led-stripe-config'
+
         # Setup mqtt
-        client = connect_mqtt()
+        client = connect_mqtt(mqtt_config, mqtt_configuration_name)
         subscribe(client)
         client.loop_start()
 
-        setup_led_stripe()
+        setup_led_stripe(led_config, led_configuration_name)
 
         print("Setup done!")
 
@@ -87,30 +126,15 @@ if __name__ == "__main__":
         return json.dumps(state)
 
 
-    # Process arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-mc', '--mqttconfig', action='store', dest='mqtt_config', help='The location of the mqtt config')
-    parser.add_argument('-lc', '--ledconfig', action='store', dest='led_config', help='The location of the addressable led config')
-    parser.add_argument('-id', '--deviceid', action='store', dest='id', help='The id of the device')
-    args = parser.parse_args()
-
-    logging.basicConfig(filename="rasp_info.log")
-
-    # MQTT config file
-    mqtt_config = configparser.ConfigParser()
-    mqtt_config.read(args.mqtt_config)
-    mqtt_configuration_name = 'mqtt-config'
-
-    # Addressable LED Stripe config file
-    led_config = configparser.ConfigParser()
-    led_config.read(args.led_config)
-    led_configuration_name = 'led-stripe-config'
+    args = get_args()
+    state: State
 
     # Constants
     LED_TOPIC = f'device/{args.id}/command'
+    REQUEST_TOPIC = f'device/{args.id}/request'
     PUBLISH_TOPIC = f'main/{args.id}/1'
 
-    setup()
+    setup(args)
 
     while True:
         try:
