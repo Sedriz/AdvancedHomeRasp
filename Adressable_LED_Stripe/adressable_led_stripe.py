@@ -18,10 +18,16 @@ if __name__ == "__main__":
             else:
                 print("Failed to connect, return code %d\n", rc)
 
-        client = mqtt.Client(CLIENT_ID)
-        client.username_pw_set(USERNAME, PASSWORD)
+        username = mqtt_config.get(mqtt_configuration_name, 'username')
+        password = mqtt_config.get(mqtt_configuration_name, 'password')
+        ip = mqtt_config.get(mqtt_configuration_name, 'ip')
+        port = mqtt_config.getint(mqtt_configuration_name, 'port')
+        client_id = f'python-mqtt-{random.randint(0, 100)}'
+
+        client = mqtt.Client(client_id)
+        client.username_pw_set(username, password)
         client.on_connect = on_connect
-        client.connect(IP, PORT)
+        client.connect(ip, port)
         return client
 
 
@@ -33,18 +39,38 @@ if __name__ == "__main__":
         client.on_message = on_message
 
 
-    def publish(client: mqtt, value):
+    def publish(client: mqtt, state: State):
+        value = serialize_json(state)
+
         logging.info("Publishing to topic: " + PUBLISH_TOPIC)
         logging.info("Publishing message: " + value)
 
         client.publish(PUBLISH_TOPIC, value)
 
 
+    def setup_led_stripe():
+        count = led_config.getint(led_configuration_name, 'led_count')
+        pin = led_config.getint(led_configuration_name, 'led_pin')
+        freq_hz = led_config.getint(led_configuration_name, 'led_freq_hz')
+        dma = led_config.getint(led_configuration_name, 'led_dma')
+        invert = led_config.getboolean(led_configuration_name, 'led_invert')
+        brightness = led_config.getint(led_configuration_name, 'led_brightness')
+        channel = led_config.getint(led_configuration_name, 'led_channel')
+
+        # Create NeoPixel object with appropriate configuration.
+        strip = Adafruit_NeoPixel(count, pin, freq_hz, dma, invert, brightness, channel)
+        # Initialize the library (must be called once before other functions).
+        strip.begin()
+
+
     def setup():
+        print("Setting up!")
         # Setup mqtt
         client = connect_mqtt()
         subscribe(client)
         client.loop_start()
+
+        setup_led_stripe()
 
         print("Setup done!")
 
@@ -81,20 +107,8 @@ if __name__ == "__main__":
     led_configuration_name = 'led-stripe-config'
 
     # Constants
-    USERNAME = mqtt_config.get(mqtt_configuration_name, 'username')
-    PASSWORD = mqtt_config.get(mqtt_configuration_name, 'password')
-    IP = mqtt_config.get(mqtt_configuration_name, 'ip')
-    PORT = mqtt_config.getint(mqtt_configuration_name, 'port')
-    CLIENT_ID = f'python-mqtt-{random.randint(0, 100)}'
     LED_TOPIC = f'device/{args.id}/command'
     PUBLISH_TOPIC = f'main/{args.id}/1'
-    LED_COUNT = led_config.getint(led_configuration_name, 'led_count')
-    LED_PIN = led_config.getint(led_configuration_name, 'led_pin')
-    LED_FREQ_HZ = led_config.getint(led_configuration_name, 'led_freq_hz')
-    LED_DMA = led_config.getint(led_configuration_name, 'led_dma')
-    LED_INVERT = led_config.getboolean(led_configuration_name, 'led_invert')
-    LED_BRIGHTNESS = led_config.getint(led_configuration_name, 'led_brightness')
-    LED_CHANNEL = led_config.getint(led_configuration_name, 'led_channel')
 
     setup()
 
