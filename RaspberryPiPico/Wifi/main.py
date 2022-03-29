@@ -7,7 +7,7 @@ import wifi
 # Define all constants
 SSID = "PowerStaack"
 PASSWORD = "Staackdasinternet"
-TOKEN = "BBFF-pJfCaU0fX1mGWUHgwkLTkCUlKBvCBS"
+TOKEN = ""
 DEVICE_LABEL = "test"
 VARIABLE_LABEL = "temperature"
 USER_AGENT = "randomstring"
