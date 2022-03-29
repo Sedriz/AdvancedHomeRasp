@@ -31,12 +31,12 @@ class State:
         }
         return json.dumps(obj)
 
-    def set_value_from_json(self, value):
+    def set_value_from_json(self, value: str):
         json_obj = json.loads(value)
 
-        self.timestamp = json_obj.timestamp
-        self.mode = json_obj.mode
-        self.speed = json_obj.speed
-        self.brightness = json_obj.brightness
-        self.colors = json_obj.colors
-        self.special_numbers = json_obj.special_numbers
+        self.timestamp = json_obj.get("timestamp")
+        self.mode = json_obj.get("mode")
+        self.speed = json_obj.get("speed")
+        self.brightness = json_obj.get("brightness")
+        self.colors = json_obj.get("colors")
+        self.special_numbers = json_obj.get("special_numbers")
