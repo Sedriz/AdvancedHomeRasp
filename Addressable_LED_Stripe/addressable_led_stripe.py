@@ -120,12 +120,24 @@ if __name__ == "__main__":
 
     def static():
         print("static")
+
         if current_led[0] < led_count:
             if len(state.special_numbers) > 0:
                 if current_led[0] < state.special_numbers[0]:
-                    print("hello")
-                    pixels[current_led[0]] = (100, 100, 100)
+                    color = state.colors[0]
+                    pixels[current_led[0]] = (color.r, color.g, color.b)
+                for index, special_number in enumerate(state.special_numbers):
+                    next_special_number = led_count
+                    if len(state.special_numbers) >= index + 1:
+                        next_special_number = state.special_numbers[index + 1]
+                    if special_number <= current_led[0] < next_special_number:
+                        color = state.colors[index + 1]
+                        pixels[current_led[0]] = (color.r, color.g, color.b)
+            else:
+                color = state.colors[0]
+                pixels[current_led[0]] = (color.r, color.g, color.b)
 
+        current_led[0] += 1
 
     def rainbow():
         print("rainbow")
