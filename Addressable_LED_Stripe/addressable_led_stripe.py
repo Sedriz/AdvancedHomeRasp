@@ -18,7 +18,7 @@ if __name__ == "__main__":
             if rc == 0:
                 print("Connected to MQTT Broker!")
             else:
-                logging.critical("Failed to connect, return code %d\n", rc)
+                logging.critical(f"{datetime.now()} | Failed to connect, return code {rc}")
 
         username = config.get(cfg_name, 'username')
         password = config.get(cfg_name, 'password')
@@ -117,7 +117,7 @@ if __name__ == "__main__":
             elif mode == "swipe_blink":
                 swipe_blink()
             else:
-                logging.error(f"Mode with name {mode} not found!")
+                logging.error(f"{datetime.now()} | Mode with name {mode} not found!")
 
 
     # ----------------------Modes----------------------------------------------------
@@ -198,4 +198,4 @@ if __name__ == "__main__":
             time.sleep(speed)
 
         except:
-            logging.error("Error while publishing data to mqtt!")
+            logging.error(f"{datetime.now()} | Error while publishing data to mqtt!")
