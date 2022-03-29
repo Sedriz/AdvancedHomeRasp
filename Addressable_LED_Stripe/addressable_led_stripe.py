@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
             speed = 1
             if state.speed is not None:
-                sleep = state.speed
+                speed = state.speed
             time.sleep(speed)
 
         except:
