@@ -32,4 +32,11 @@ class State:
         return json.dumps(obj)
 
     def set_value_from_json(self, value):
-        self.__dict__ = json.loads(value)
+        json_obj = json.loads(value)
+
+        self.timestamp = json_obj.timestamp
+        self.mode = json_obj.mode
+        self.speed = json_obj.speed
+        self.brightness = json_obj.brightness
+        self.colors = json_obj.colors
+        self.special_numbers = json_obj.special_numbers
