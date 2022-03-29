@@ -4,6 +4,7 @@ import logging
 import configparser
 import random
 from datetime import datetime
+import time
 
 import paho.mqtt.client as mqtt
 from rpi_ws281x import *
@@ -41,7 +42,7 @@ if __name__ == "__main__":
             print(f"Received `{message}` from `{topic}` topic")
 
             if topic == LED_TOPIC:
-                state = deserialize_json(message)
+                state = State(message)
             elif topic == REQUEST_TOPIC:
                 print('Sending state')
                 publish(client, state)
@@ -52,7 +53,7 @@ if __name__ == "__main__":
 
 
     def publish(client: mqtt, state_param: State):
-        value = serialize_json(state_param)
+        value = state_param.get_json_string()
 
         logging.info("Publishing to topic: " + PUBLISH_TOPIC)
         logging.info("Publishing message: " + value)
@@ -100,16 +101,8 @@ if __name__ == "__main__":
         print("executing")
 
 
-    def deserialize_json(value: str) -> State:
-        return State(value)
-
-
-    def serialize_json(state: State) -> str:
-        return json.dumps(state)
-
-
     args = get_args()
-    state: State
+    state: State = State()
 
     # Constants
     LED_TOPIC = f'device/{args.id}/command'
@@ -142,5 +135,6 @@ if __name__ == "__main__":
     while True:
         try:
             print("hello")
+            time.sleep(2)
         except:
             logging.error("Error while publishing data to mqtt!")
