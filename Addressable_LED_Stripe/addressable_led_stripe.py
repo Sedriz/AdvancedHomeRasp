@@ -16,9 +16,9 @@ if __name__ == "__main__":
     def connect_mqtt(config, cfg_name) -> mqtt:
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
-                print("Connected to MQTT Broker!")
+                logging.info("Connected to MQTT Broker!")
             else:
-                print("Failed to connect, return code %d\n", rc)
+                logging.critical("Failed to connect, return code %d\n", rc)
 
         username = config.get(cfg_name, 'username')
         password = config.get(cfg_name, 'password')
@@ -39,12 +39,12 @@ if __name__ == "__main__":
             message = msg.payload.decode()
             topic = msg.topic
 
-            print(f"Received `{message}` from `{topic}` topic")
+            logging.info(f"Received `{message}` from `{topic}` topic")
 
             if topic == LED_TOPIC:
                 state.set_value_from_json(message)
             elif topic == REQUEST_TOPIC:
-                print('Sending state')
+                logging.info("Sending state")
                 publish(client, state)
 
         client.subscribe(LED_TOPIC)
@@ -116,6 +116,8 @@ if __name__ == "__main__":
                 stars()
             elif mode == "swipe_blink":
                 swipe_blink()
+            else:
+                logging.error(f"Mode with name {mode} not found!")
 
 
     # ----------------------Modes----------------------------------------------------
@@ -163,7 +165,7 @@ if __name__ == "__main__":
     REQUEST_TOPIC = f'device/{args.id}/request'
     PUBLISH_TOPIC = f'main/{args.id}/1'
 
-    print("Setting up!")
+    logging.info("Setting up!")
 
     logging.basicConfig(filename="addressable_led_stripe.log")
 
@@ -184,7 +186,7 @@ if __name__ == "__main__":
 
     setup_led_stripe(led_config, led_configuration_name)
 
-    print("Setup done!")
+    logging.info("Setup done!")
 
     while True:
         try:
