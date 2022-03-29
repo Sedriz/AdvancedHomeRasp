@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
 
     def setup_led_stripe(count: int) -> neopixel.NeoPixel:
-        return neopixel.NeoPixel(board.D18, count, auto_write=True)
+        return neopixel.NeoPixel(board.D18, count, auto_write=True, pixel_order=neopixel.GRB)
 
 
     def get_args():
