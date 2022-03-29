@@ -176,11 +176,6 @@ if __name__ == "__main__":
     mqtt_config.read(args.mqtt_config)
     mqtt_configuration_name = 'mqtt-config'
 
-    # Addressable LED Stripe config file
-    led_config = configparser.ConfigParser()
-    led_config.read(args.led_config)
-    led_configuration_name = 'led-stripe-config'
-
     # Setup mqtt
     mqtt_client = connect_mqtt(mqtt_config, mqtt_configuration_name)
     subscribe(mqtt_client)
