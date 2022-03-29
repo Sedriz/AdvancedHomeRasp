@@ -16,7 +16,7 @@ if __name__ == "__main__":
     def connect_mqtt(config, cfg_name) -> mqtt:
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
-                logging.info("Connected to MQTT Broker!")
+                print("Connected to MQTT Broker!")
             else:
                 logging.critical("Failed to connect, return code %d\n", rc)
 
@@ -39,12 +39,12 @@ if __name__ == "__main__":
             message = msg.payload.decode()
             topic = msg.topic
 
-            logging.info(f"Received `{message}` from `{topic}` topic")
+            print(f"Received `{message}` from `{topic}` topic")
 
             if topic == LED_TOPIC:
                 state.set_value_from_json(message)
             elif topic == REQUEST_TOPIC:
-                logging.info("Sending state")
+                print("Sending state")
                 publish(client, state)
 
         client.subscribe(LED_TOPIC)
@@ -55,8 +55,8 @@ if __name__ == "__main__":
     def publish(client: mqtt, state_param: State):
         value = state_param.get_json_string()
 
-        logging.info("Publishing to topic: " + PUBLISH_TOPIC)
-        logging.info("Publishing message: " + value)
+        print("Publishing to topic: " + PUBLISH_TOPIC)
+        print("Publishing message: " + value)
 
         client.publish(PUBLISH_TOPIC, value)
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     REQUEST_TOPIC = f'device/{args.id}/request'
     PUBLISH_TOPIC = f'main/{args.id}/1'
 
-    logging.info("Setting up!")
+    print("Setting up!")
 
     logging.basicConfig(filename="addressable_led_stripe.log")
 
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     setup_led_stripe(led_config, led_configuration_name)
 
-    logging.info("Setup done!")
+    print("Setup done!")
 
     while True:
         try:
