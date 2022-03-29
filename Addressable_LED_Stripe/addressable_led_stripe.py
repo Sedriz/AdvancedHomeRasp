@@ -100,21 +100,21 @@ if __name__ == "__main__":
     def execute_mode():
         mode = state.mode
         if mode is not None:
-            if mode is "static":
+            if mode == "static":
                 static()
-            elif mode is "rainbow":
+            elif mode == "rainbow":
                 rainbow()
-            elif mode is "stripe":
+            elif mode == "stripe":
                 stripe()
-            elif mode is "gradient":
+            elif mode == "gradient":
                 gradient()
-            elif mode is "blink":
+            elif mode == "blink":
                 blink()
-            elif mode is "meet":
+            elif mode == "meet":
                 meet()
-            elif mode is "stars":
+            elif mode == "stars":
                 stars()
-            elif mode is "swipe_blink":
+            elif mode == "swipe_blink":
                 swipe_blink()
 
 
