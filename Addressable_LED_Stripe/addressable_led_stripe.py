@@ -42,7 +42,7 @@ if __name__ == "__main__":
             print(f"Received `{message}` from `{topic}` topic")
 
             if topic == LED_TOPIC:
-                state = State(message)
+                state.set_value_from_json(message)
             elif topic == REQUEST_TOPIC:
                 print('Sending state')
                 publish(client, state)

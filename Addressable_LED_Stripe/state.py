@@ -30,3 +30,6 @@ class State:
             "special_numbers": self.special_numbers,
         }
         return json.dumps(obj)
+
+    def set_value_from_json(self, value):
+        self.__dict__ = json.loads(value)
