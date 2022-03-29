@@ -4,7 +4,7 @@ import json
 class State:
     timestamp = ''
     mode = ''
-    speed = 100
+    speed = 1
     brightness = 80
     colors = []
     special_numbers = []

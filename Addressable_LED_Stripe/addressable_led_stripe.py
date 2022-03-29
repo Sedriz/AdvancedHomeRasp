@@ -135,6 +135,11 @@ if __name__ == "__main__":
     while True:
         try:
             print("hello")
-            time.sleep(2)
+
+            speed = 1
+            if state.speed is not None:
+                sleep = state.speed
+            time.sleep(speed)
+
         except:
             logging.error("Error while publishing data to mqtt!")
