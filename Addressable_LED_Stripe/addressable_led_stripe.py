@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
 
     args = get_args()
-    state: State = State()
+    state: State = State(None)
 
     # Constants
     LED_TOPIC = f'device/{args.id}/command'

@@ -21,4 +21,12 @@ class State:
             self.special_numbers = value.special_numbers
 
     def get_json_string(self) -> str:
-        return json.dumps(self)
+        obj = {
+            "timestamp": self.timestamp,
+            "mode": self.mode,
+            "speed": self.speed,
+            "brightness": self.brightness,
+            "colors": self.colors,
+            "special_numbers": self.special_numbers,
+        }
+        return json.dumps(obj)
