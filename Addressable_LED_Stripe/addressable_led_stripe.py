@@ -7,7 +7,8 @@ from datetime import datetime
 import time
 
 import paho.mqtt.client as mqtt
-from rpi_ws281x import *
+import board
+import neopixel
 from state import State
 from mode_enum import ModeEnum
 
@@ -61,19 +62,8 @@ if __name__ == "__main__":
         client.publish(PUBLISH_TOPIC, value)
 
 
-    def setup_led_stripe(config, cfg_name):
-        count = config.getint(cfg_name, 'led_count')
-        pin = config.getint(cfg_name, 'led_pin')
-        freq_hz = config.getint(cfg_name, 'led_freq_hz')
-        dma = config.getint(cfg_name, 'led_dma')
-        invert = config.getboolean(cfg_name, 'led_invert')
-        brightness = config.getint(cfg_name, 'led_brightness')
-        channel = config.getint(cfg_name, 'led_channel')
-
-        # Create NeoPixel object with appropriate configuration.
-        strip = Adafruit_NeoPixel(count, pin, freq_hz, dma, invert, brightness, channel)
-        # Initialize the library (must be called once before other functions).
-        strip.begin()
+    def setup_led_stripe(count: int) -> neopixel.NeoPixel:
+        return neopixel.NeoPixel(board.D18, count, auto_write=True)
 
 
     def get_args():
@@ -94,6 +84,11 @@ if __name__ == "__main__":
                             action='store',
                             dest='id',
                             help='The id of the device')
+        parser.add_argument('-c',
+                            '--count',
+                            action='store',
+                            dest='led_count',
+                            help='The led count')
         return parser.parse_args()
 
 
@@ -125,6 +120,11 @@ if __name__ == "__main__":
 
     def static():
         print("static")
+        if current_led[0] < led_count:
+            if len(state.special_numbers) > 0:
+                if current_led[0] < state.special_numbers[0]:
+                    print("hello")
+                    pixels[current_led[0]] = (100, 100, 100)
 
 
     def rainbow():
@@ -159,6 +159,8 @@ if __name__ == "__main__":
 
     args = get_args()
     state: State = State(None)
+    led_count = 0
+    current_led = [0, 0, 0, 0, 0]
 
     # Constants
     LED_TOPIC = f'device/{args.id}/command'
@@ -184,7 +186,7 @@ if __name__ == "__main__":
     subscribe(mqtt_client)
     mqtt_client.loop_start()
 
-    setup_led_stripe(led_config, led_configuration_name)
+    pixels: neopixel.NeoPixel = setup_led_stripe(args.led_count)
 
     print("Setup done!")
 
