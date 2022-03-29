@@ -98,8 +98,62 @@ if __name__ == "__main__":
 
 
     def execute_mode():
-        print("executing")
+        mode = state.mode
+        if mode is not None:
+            if mode is "static":
+                static()
+            elif mode is "rainbow":
+                rainbow()
+            elif mode is "stripe":
+                stripe()
+            elif mode is "gradient":
+                gradient()
+            elif mode is "blink":
+                blink()
+            elif mode is "meet":
+                meet()
+            elif mode is "stars":
+                stars()
+            elif mode is "swipe_blink":
+                swipe_blink()
 
+
+    # ----------------------Modes----------------------------------------------------
+
+
+    def static():
+        print("static")
+
+
+    def rainbow():
+        print("rainbow")
+
+
+    def stripe():
+        print("stripe")
+
+
+    def gradient():
+        print("gradient")
+
+
+    def blink():
+        print("blink")
+
+
+    def meet():
+        print("meet")
+
+
+    def stars():
+        print("stars")
+
+
+    def swipe_blink():
+        print("swipe_blink")
+
+
+    # ----------------------/Modes----------------------------------------------------
 
     args = get_args()
     state: State = State(None)
@@ -134,7 +188,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            print("hello")
+            execute_mode()
 
             speed = 1
             if state.speed is not None:
