@@ -18,9 +18,10 @@ def get_ufw_version():
     ufw_version_b = subprocess.check_output(['sudo', 'ufw', 'version'])
     ufw_version_str = str(ufw_version_b)
 
-    version = ufw_version_str.split("\t")[0]
-    if "ufw" in version:
-        return version
+    version = ufw_version_str.split("\n")[0]
+    if "ufw " in version:
+        version_num = version.split("ufw ")[1]
+        return str(version_num)
     else:
         return "error"
 
