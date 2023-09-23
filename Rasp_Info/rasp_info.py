@@ -114,7 +114,7 @@ parser.add_argument('-c', '--config', action='store', dest='config', help='The l
 parser.add_argument('-id', '--deviceid', action='store', dest='id', default=1, required=False, help='The id of the device')
 args = parser.parse_args()
 
-logging.basicConfig(filename="rasp_info.log")
+logging.basicConfig(filename="/var/log/rasp_info.log")
 
 config = configparser.ConfigParser()
 config.read(args.config)
