@@ -16,9 +16,9 @@ def on_connect(client, userdata, flags, rc):
 
 def get_ufw_version():
     ufw_version_b = subprocess.check_output(['sudo', 'ufw', 'version'])
-    ufw_version_str = str(ufw_version_b)
+    ufw_version_str = ufw_version_b.decode('utf-8')
 
-    version = ufw_version_str.split("\\n")[0]
+    version = ufw_version_str.split("\n")[0]
     if "ufw " in version:
         version_num = version.split("ufw ")[1]
         return str(version_num)
@@ -49,8 +49,8 @@ def get_ufw_status():
             ufw_status_obj["ssh"] = "limit"
 
         return ufw_status_obj
-    except:
-        logging.error("Error reading UFW status!")
+    except Exception as e:
+        logging.error("Error reading UFW status! " + str(e))
         return  {
             "status": "error",
             "ssh": "error",
@@ -69,7 +69,7 @@ def get_cpu_temp():
             "temperature": temperature,
         }
     except Exception as e:
-        logging.error("Error reading Raspi temperature!: " + str(e))
+        logging.error("Error reading Raspi temperature! " + str(e))
         return {
             "temperature": "error",
         }
@@ -80,8 +80,8 @@ def get_raspi_performance():
             "cpu": psutil.cpu_percent(4),
             "ram": psutil.virtual_memory()[2],
         }
-    except:
-        logging.error("Error reading Raspi performance!")
+    except Exception as e:
+        logging.error("Error reading Raspi performance! " + str(e))
         return {
             "cpu": "error",
             "ram": "error",
